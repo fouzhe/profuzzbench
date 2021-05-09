@@ -23,6 +23,19 @@ index 09df0a7..f34c235 100644
  CONSOLE_LINK_OPTS =	$(LINK_OPTS)
  LIBRARY_LINK =		ar cr 
  LIBRARY_LINK_OPTS =	
+diff --git a/liveMedia/GenericMediaServer.cpp b/liveMedia/GenericMediaServer.cpp
+index 47071c1..195581b 100644
+--- a/liveMedia/GenericMediaServer.cpp
++++ b/liveMedia/GenericMediaServer.cpp
+@@ -319,7 +319,7 @@ GenericMediaServer::ClientSession* GenericMediaServer::createNewClientSessionWit
+   // (it will be encoded as a 8-digit hex number).  (We avoid choosing session id 0,
+   // because that has a special use by some servers.)
+   do {
+-    sessionId = (u_int32_t)our_random32();
++    sessionId = (u_int32_t)8888;
+     snprintf(sessionIdStr, sizeof sessionIdStr, "%08X", sessionId);
+   } while (sessionId == 0 || lookupClientSession(sessionIdStr) != NULL);
+ 
 diff --git a/liveMedia/RTSPServer.cpp b/liveMedia/RTSPServer.cpp
 index 677753c..77ccac7 100644
 --- a/liveMedia/RTSPServer.cpp
