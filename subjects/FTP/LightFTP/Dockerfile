@@ -27,12 +27,12 @@ WORKDIR /home/ubuntu
 ENV LLVM_CONFIG="llvm-config-3.8"
 
 # Set up fuzzers
-RUN git clone https://github.com/profuzzbench/aflnet.git && \
+RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
     cd llvm_mode && make
 
-RUN git clone https://github.com/profuzzbench/aflnwe.git && \
+RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
     cd llvm_mode && make
@@ -59,7 +59,7 @@ COPY --chown=ubuntu:ubuntu clean.sh ${WORKDIR}/ftpclean
 
 # Download and compile LightFTP for fuzzing
 RUN cd $WORKDIR && \
-    git clone https://github.com/hfiref0x/LightFTP.git && \
+    git clone https://github.com.cnpmjs.org/hfiref0x/LightFTP.git && \
     cd LightFTP && \
     git checkout 5980ea1 && \
     patch -p1 < ${WORKDIR}/fuzzing.patch && \
@@ -75,7 +75,7 @@ RUN cd ${WORKDIR}/LightFTP/Source/Release && \
 
 # Download and compile LightFTP for coverage analysis
 RUN cd $WORKDIR && \
-    git clone https://github.com/hfiref0x/LightFTP.git LightFTP-gcov && \
+    git clone https://github.com.cnpmjs.org/hfiref0x/LightFTP.git LightFTP-gcov && \
     cd LightFTP-gcov && \
     git checkout 5980ea1 && \
     patch -p1 < ${WORKDIR}/gcov.patch && \

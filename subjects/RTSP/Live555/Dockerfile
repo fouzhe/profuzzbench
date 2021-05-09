@@ -27,12 +27,12 @@ WORKDIR /home/ubuntu
 ENV LLVM_CONFIG="llvm-config-3.8"
 
 # Set up fuzzers
-RUN git clone https://github.com/profuzzbench/aflnet.git && \
+RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
     cd llvm_mode && make
 
-RUN git clone https://github.com/profuzzbench/aflnwe.git && \
+RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
     cd llvm_mode && make
@@ -60,11 +60,11 @@ COPY --chown=ubuntu:ubuntu run.sh ${WORKDIR}/run
 
 # Download and compile Live555 for fuzzing
 RUN cd $WORKDIR && \
-    git clone https://github.com/rgaufman/live555.git && \
+    git clone https://github.com.cnpmjs.org/rgaufman/live555.git && \
     cd live555 && \
-    git checkout ceeb4f4 && \
+    git checkout bbee4ed && \
     patch -p1 < $WORKDIR/fuzzing.patch && \
-    ./genMakefiles linux && \
+    ./genMakefiles linux-64bit && \
     make clean all
 
 # Set up Live555 for fuzzing
@@ -73,11 +73,11 @@ RUN cd ${WORKDIR}/live555/testProgs && \
 
 # Download and compile Live555 for coverage analysis
 RUN cd $WORKDIR && \
-    git clone https://github.com/rgaufman/live555.git live555-cov && \
+    git clone https://github.com.cnpmjs.org/rgaufman/live555.git live555-cov && \
     cd live555-cov && \
-    git checkout ceeb4f4 && \
+    git checkout bbee4ed && \
     patch -p1 < $WORKDIR/gcov.patch && \
-    ./genMakefiles linux && \
+    ./genMakefiles linux-64bit && \
     make CFLAGS="-fprofile-arcs -ftest-coverage" CPPFLAGS="-fprofile-arcs -ftest-coverage" CXXFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" clean all
 
 # Set up Live555 for coverage analysis
