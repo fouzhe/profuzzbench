@@ -27,12 +27,12 @@ WORKDIR /home/ubuntu
 ENV LLVM_CONFIG="llvm-config-3.8"
 
 # Set up fuzzers
-RUN git clone https://github.com/profuzzbench/aflnet.git && \
+RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
     cd llvm_mode && make
 
-RUN git clone https://github.com/profuzzbench/aflnwe.git && \
+RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
     cd llvm_mode && make
@@ -56,7 +56,7 @@ COPY --chown=ubuntu:ubuntu gcov.patch ${WORKDIR}/gcov.patch
 
 # Download and compile TinyDTLS for fuzzing
 RUN cd $WORKDIR && \
-    git clone https://github.com/assist-project/tinydtls-fuzz.git tinydtls && \
+    git clone https://github.com.cnpmjs.org/assist-project/tinydtls-fuzz.git tinydtls && \
     cd tinydtls && \
     git checkout 06995d4 && \
     cd tests && \
@@ -64,7 +64,7 @@ RUN cd $WORKDIR && \
 
 # Download and compile TinyDTLS for coverage analysis
 RUN cd $WORKDIR && \
-    git clone https://github.com/assist-project/tinydtls-fuzz.git tinydtls-gcov && \
+    git clone https://github.com.cnpmjs.org/assist-project/tinydtls-fuzz.git tinydtls-gcov && \
     cd tinydtls-gcov && \
     git checkout 06995d4 && \
     patch -p1 < $WORKDIR/gcov.patch && \
