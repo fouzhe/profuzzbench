@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # Install common dependencies
 RUN apt-get -y update && \
@@ -9,7 +9,7 @@ RUN apt-get -y update && \
     clang \
     graphviz-dev \
     git \
-    libgnutls-dev \
+    libgnutls28-dev \
     python-pip \
     nano \
     net-tools \
@@ -24,20 +24,18 @@ USER ubuntu
 WORKDIR /home/ubuntu
 
 # Download and compile AFLNet
-# ENV LLVM_CONFIG="llvm-config-3.8"
+ENV LLVM_CONFIG="llvm-config-6.0"
 
 # Set up fuzzers
 RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnet.git && \
     cd aflnet && \
-    make clean all 
-    # && \
-    # cd llvm_mode && make
+    make clean all && \ 
+    cd llvm_mode && make
 
 RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnwe.git && \
-    cd aflnwe && \
-    make clean all 
-    # && \
-    # cd llvm_mode && make
+    cd aflnwe && \ 
+    make clean all && \ 
+    cd llvm_mode && make
 
 # Set up environment variables for AFLNet
 ENV WORKDIR="/home/ubuntu/experiments"
