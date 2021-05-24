@@ -24,18 +24,20 @@ USER ubuntu
 WORKDIR /home/ubuntu
 
 # Download and compile AFLNet
-ENV LLVM_CONFIG="llvm-config-3.8"
+# ENV LLVM_CONFIG="llvm-config-3.8"
 
 # Set up fuzzers
 RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnet.git && \
     cd aflnet && \
-    make clean all && \
-    cd llvm_mode && make
+    make clean all 
+    # && \
+    # cd llvm_mode && make
 
 RUN git clone https://github.com.cnpmjs.org/profuzzbench/aflnwe.git && \
     cd aflnwe && \
-    make clean all && \
-    cd llvm_mode && make
+    make clean all 
+    # && \
+    # cd llvm_mode && make
 
 # Set up environment variables for AFLNet
 ENV WORKDIR="/home/ubuntu/experiments"
