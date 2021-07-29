@@ -22,6 +22,9 @@ RUN groupadd ubuntu && \
 
 WORKDIR /home/ubuntu
 
+# Import environment variable to pass as parameter to make (e.g., to make parallel builds with -j)
+ARG MAKE_OPT
+
 # Download and compile AFLNet
 ENV LLVM_CONFIG="llvm-config-3.8"
 
@@ -29,12 +32,12 @@ ENV LLVM_CONFIG="llvm-config-3.8"
 RUN git clone https://github.com/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 RUN git clone https://github.com/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 # Set up environment variables for AFLNet
 ENV WORKDIR="/home/ubuntu/experiments"
@@ -46,7 +49,7 @@ ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 \
     AFL_NO_AFFINITY=1
 
 RUN mkdir $WORKDIR && \
-    pip install gcovr
+    pip install gcovr==4.2
 
 COPY --chown=ubuntu:ubuntu in-dicom ${WORKDIR}/in-dicom
 COPY --chown=ubuntu:ubuntu cov_script.sh ${WORKDIR}/cov_script
@@ -63,7 +66,7 @@ RUN cd $WORKDIR && \
     patch -p1 < $WORKDIR/fuzzing.patch && \
     mkdir build && cd build && \
     cmake .. && \
-    make dcmqrscp
+    make dcmqrscp $MAKE_OPT
 
 # Download and compile Dcmtk for coverage analysis
 RUN cd $WORKDIR && \
@@ -73,7 +76,7 @@ RUN cd $WORKDIR && \
     patch -p1 < $WORKDIR/normal.patch && \
     mkdir build && cd build && \
     cmake -G"Unix Makefiles" .. -DCMAKE_C_FLAGS="-g -fprofile-arcs -ftest-coverage" -DCMAKE_CXX_FLAGS="-g -fprofile-arcs -ftest-coverage" && \
-    make dcmqrscp
+    make dcmqrscp $MAKE_OPT
 
 # Setup server for fuzzing and coverage analysis
 RUN cd $WORKDIR/dcmtk/build/bin && \
