@@ -25,6 +25,9 @@ RUN groupadd ubuntu && \
 USER ubuntu
 WORKDIR /home/ubuntu
 
+# Import environment variable to pass as parameter to make (e.g., to make parallel builds with -j)
+ARG MAKE_OPT
+
 # Download and compile AFLNet
 ENV LLVM_CONFIG="llvm-config-3.8"
 
@@ -32,12 +35,12 @@ ENV LLVM_CONFIG="llvm-config-3.8"
 RUN git clone https://github.com/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 RUN git clone https://github.com/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 # Set up environment variables for AFLNet
 ENV WORKDIR="/home/ubuntu/experiments"
@@ -51,7 +54,7 @@ ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 \
 RUN mkdir $WORKDIR && \
     mkdir /home/ubuntu/ftpshare && \
     chown -R ubuntu:ubuntu /home/ubuntu/ftpshare && \
-    pip install gcovr
+    pip install gcovr==4.2
 
 COPY --chown=ubuntu:ubuntu fuzzing.patch ${WORKDIR}/fuzzing.patch
 COPY --chown=ubuntu:ubuntu gcov.patch ${WORKDIR}/gcov.patch
@@ -71,15 +74,15 @@ RUN cd ${WORKDIR} && \
     tar -zxvf bftpd-5.7.tar.gz && \
     cd bftpd && \
     patch -p1 < ${WORKDIR}/fuzzing.patch && \
-    CC=afl-clang-fast make clean all
+    CC=afl-clang-fast make clean all $MAKE_OPT
 
 # Set up Bftpd for coverage analysis
 RUN cd ${WORKDIR}/bftpd-gcov && \
     patch -p1 < ${WORKDIR}/gcov.patch && \
-    make
+    make $MAKE_OPT
 
 # Switch default user to root
 USER root
 WORKDIR /home/ubuntu
 
-RUN pip install gcovr
+RUN pip install gcovr==4.2

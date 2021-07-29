@@ -25,6 +25,9 @@ RUN groupadd ubuntu && \
 USER ubuntu
 WORKDIR /home/ubuntu
 
+# Import environment variable to pass as parameter to make (e.g., to make parallel builds with -j)
+ARG MAKE_OPT
+
 # Download and compile AFLNet
 ENV LLVM_CONFIG="llvm-config-3.8"
 
@@ -32,12 +35,12 @@ ENV LLVM_CONFIG="llvm-config-3.8"
 RUN git clone https://github.com/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 RUN git clone https://github.com/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 # Set up environment variables for AFLNet
 ENV WORKDIR="/home/ubuntu/experiments"
@@ -49,7 +52,7 @@ ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 \
     AFL_NO_AFFINITY=1
 
 RUN mkdir $WORKDIR && \
-    pip install gcovr
+    pip install gcovr==4.2
 
 COPY --chown=ubuntu:ubuntu in-sip ${WORKDIR}/in-sip
 COPY --chown=ubuntu:ubuntu cov_script.sh ${WORKDIR}/cov_script
@@ -67,7 +70,7 @@ RUN cd $WORKDIR && \
     git checkout 2648eb3 && \
     patch -p1 < $WORKDIR/kamailio.patch && \
     CC=afl-clang-fast make cfg && \
-    CC=afl-clang-fast make all
+    CC=afl-clang-fast make all $MAKE_OPT
 
 RUN cd $WORKDIR && \
     git clone https://github.com/pjsip/pjproject.git && \
@@ -75,7 +78,7 @@ RUN cd $WORKDIR && \
     git checkout bba95b8 && \
     patch -p1 < $WORKDIR/pjsip.patch && \
     ./configure && \
-    make dep && make clean && make
+    make dep && make clean && make $MAKE_OPT
 
 # Download and compile Kamalio for code coverage analysis
 RUN cd $WORKDIR && \
@@ -84,4 +87,4 @@ RUN cd $WORKDIR && \
     git checkout 2648eb3 && \
     patch -p1 < $WORKDIR/kamailio.patch && \
     make CC_EXTRA_OPTS="-fprofile-arcs -ftest-coverage" LD_EXTRA_OPTS="-fprofile-arcs -ftest-coverage" cfg && \
-    make CC_EXTRA_OPTS="-fprofile-arcs -ftest-coverage" LD_EXTRA_OPTS="-fprofile-arcs -ftest-coverage" all
+    make CC_EXTRA_OPTS="-fprofile-arcs -ftest-coverage" LD_EXTRA_OPTS="-fprofile-arcs -ftest-coverage" all $MAKE_OPT

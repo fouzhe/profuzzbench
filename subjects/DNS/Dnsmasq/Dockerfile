@@ -22,6 +22,9 @@ RUN groupadd ubuntu && \
 
 WORKDIR /home/ubuntu
 
+# Import environment variable to pass as parameter to make (e.g., to make parallel builds with -j)
+ARG MAKE_OPT
+
 # Download and compile AFLNet
 ENV LLVM_CONFIG="llvm-config-3.8"
 
@@ -29,12 +32,12 @@ ENV LLVM_CONFIG="llvm-config-3.8"
 RUN git clone https://github.com/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 RUN git clone https://github.com/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 # Set up environment variables for AFLNet
 ENV WORKDIR="/home/ubuntu/experiments"
@@ -46,20 +49,22 @@ ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 \
     AFL_NO_AFFINITY=1
 
 RUN mkdir $WORKDIR && \
-    pip install gcovr
+    pip install gcovr==4.2
 
 COPY --chown=ubuntu:ubuntu in-dns ${WORKDIR}/in-dns
 COPY --chown=ubuntu:ubuntu dns.dict ${WORKDIR}/dns.dict
 COPY --chown=ubuntu:ubuntu cov_script.sh ${WORKDIR}/cov_script
 COPY --chown=ubuntu:ubuntu run.sh ${WORKDIR}/run
 COPY --chown=ubuntu:ubuntu dnsmasq.conf ${WORKDIR}/dnsmasq.conf
+COPY --chown=ubuntu:ubuntu dnsmasq.patch ${WORKDIR}/dnsmasq.patch
 
 # Download and compile Dnsmasq for fuzzing
 RUN cd $WORKDIR && \
     git clone git://thekelleys.org.uk/dnsmasq.git && \
     cd dnsmasq && \
     git checkout v2.73rc6 && \
-    CC=afl-clang-fast make && \
+    patch -p1 < ${WORKDIR}/dnsmasq.patch && \
+    CC=afl-clang-fast make $MAKE_OPT && \
     cp ${WORKDIR}/dnsmasq.conf /etc/ && \
     echo address=/test.com/5.5.5.5 | sudo tee -a /etc/dnsmasq.conf
 
@@ -68,4 +73,5 @@ RUN cd $WORKDIR && \
     git clone git://thekelleys.org.uk/dnsmasq.git dnsmasq-gcov && \
     cd dnsmasq-gcov && \
     git checkout v2.73rc6 && \
-    make CFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage"
+    patch -p1 < ${WORKDIR}/dnsmasq.patch && \
+    make CFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" $MAKE_OPT

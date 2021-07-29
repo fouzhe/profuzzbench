@@ -26,6 +26,9 @@ RUN groupadd ubuntu && \
 USER ubuntu
 WORKDIR /home/ubuntu
 
+# Import environment variable to pass as parameter to make (e.g., to make parallel builds with -j)
+ARG MAKE_OPT
+
 # Download and compile AFLNet
 ENV LLVM_CONFIG="llvm-config-3.8"
 
@@ -33,12 +36,12 @@ ENV LLVM_CONFIG="llvm-config-3.8"
 RUN git clone https://github.com/profuzzbench/aflnet.git && \
     cd aflnet && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 RUN git clone https://github.com/profuzzbench/aflnwe.git && \
     cd aflnwe && \
     make clean all && \
-    cd llvm_mode && make
+    cd llvm_mode && make $MAKE_OPT
 
 # Set up environment variables for AFLNet
 ENV WORKDIR="/home/ubuntu/experiments"
@@ -50,7 +53,7 @@ ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 \
     AFL_NO_AFFINITY=1
 
 RUN mkdir $WORKDIR && \
-    pip install gcovr
+    pip install gcovr==4.2
 
 COPY --chown=ubuntu:ubuntu fuzzing.patch ${WORKDIR}/fuzzing.patch
 COPY --chown=ubuntu:ubuntu gcov.patch ${WORKDIR}/gcov.patch
@@ -68,7 +71,7 @@ RUN cd ${WORKDIR} && \
     patch -p1 < ${WORKDIR}/fuzzing.patch && \
     autogen.sh && \
     CC="afl-clang-fast" CXX="afl-clang-fast++" ./configure --without-privsep -without-capabilities && \
-    make
+    make $MAKE_OPT
 
 # Set up PureFTPD for coverage analysis
 RUN cd ${WORKDIR} && \
@@ -78,10 +81,10 @@ RUN cd ${WORKDIR} && \
     patch -p1 < ${WORKDIR}/gcov.patch && \
     autogen.sh && \
     CFLAGS="-fprofile-arcs -ftest-coverage" CPPFLAGS="-fprofile-arcs -ftest-coverage" CXXFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" ./configure --without-privsep -without-capabilities && \
-    make
+    make $MAKE_OPT
 
 # Switch default user to root
 USER root
 WORKDIR /home/ubuntu
 
-RUN pip install gcovr
+RUN pip install gcovr==4.2
